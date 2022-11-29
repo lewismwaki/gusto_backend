@@ -1,0 +1,11 @@
+{
+  "name": "appetit_backend",
+  "version": 2,
+  "builds": [
+    {
+      "src": "index.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [{ "src": "/(.*)", "dest": "/" }]
+}

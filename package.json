@@ -2,6 +2,9 @@
   "name": "appetit_backend",
   "version": "1.0.0",
   "main": "index.ts",
+  "engine": {
+    "node": "18.x"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -17,9 +20,9 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build":"node dist/index.js --output public",
+    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\"",
     "start": "node dist/index.js",
-    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\""
+    "build": "node dist/index.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.0",
