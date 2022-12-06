@@ -3,30 +3,45 @@ import UserModel from "../models/user.model";
 import bcrypt from "bcrypt";
 import validator from "validator";
 import { CreateUserType } from "../schema/user.schema";
+import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 
-export const signUpUserHandler = async (
+const createToken = (_id: mongoose.Types.ObjectId) => {
+  return jwt.sign({ _id }, process.env.SECRET!, {
+    expiresIn: "3d",
+  });
+};
+
+export const createUserHandler = async (
   req: Request<{}, {}, CreateUserType>,
   res: Response
 ) => {
-  const { username, email, phoneNumber, password } = req.body;
-
-  const emailExists = await UserModel.findOne({ email });
-  if (emailExists) {
-    return res.status(400).json({ error: "User with this email exists" });
-  }
-
-  if (!validator.isMobilePhone(phoneNumber)) {
-    return res.status(400).json({ error: "Please enter a valid phoneNumber" });
-  }
-
-  const phoneNumberExists = await UserModel.findOne({ phoneNumber });
-  if (phoneNumberExists) {
-    return res.status(400).json({ error: "User with this phoneNumber exists" });
-  }
-
   try {
+    const { username, email, phoneNumber, password } = req.body;
+
+    const emailExists = await UserModel.findOne({ email });
+    if (emailExists) {
+      return res
+        .status(400)
+        .json({ error: "User with this email already exists" });
+    }
+
+    if (!validator.isMobilePhone(phoneNumber.toString())) {
+      return res
+        .status(400)
+        .json({ error: "Please enter a valid phoneNumber" });
+    }
+
+    const phoneNumberExists = await UserModel.findOne({ phoneNumber });
+    if (phoneNumberExists) {
+      return res
+        .status(400)
+        .json({ error: "User with this phoneNumber already exists" });
+    }
+
     const hash = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, hash);
+
     const user = await UserModel.create({
       username,
       email,
@@ -34,39 +49,36 @@ export const signUpUserHandler = async (
       password: hashedPassword,
     });
 
-    res.status(200).json(user);
+    const token = createToken(user._id);
+
+    res.status(201).json({ token, user });
   } catch (error) {
     res.status(400).json({ error: error });
   }
 };
 
-export const logInUserHandler = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({ error: "Please enter email and password!" });
-  }
-
-  const existingUser = await UserModel.findOne({ email });
-
-  if (!existingUser) {
-    return res
-      .status(400)
-      .json({ error: "User with this email does not exist" });
-  }
-
+export const loginHandler = async (req: Request, res: Response) => {
   try {
-    const matches = await bcrypt.compare(password, existingUser.password);
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: "Please enter email and password" });
+    }
+
+    const user = await UserModel.findOne({ email });
+
+    if (!user) {
+      return res.status(400).json({ error: "Incorrect email or password" });
+    }
+
+    const matches = await bcrypt.compare(password, user.password);
 
     if (!matches)
-      return res.status(400).json({ error: "Passwords don't match" });
+      return res.status(400).json({ error: "Incorrect email or password" });
 
-    const user = await UserModel.create({
-      email,
-      password,
-    });
+    const token = createToken(user._id);
 
-    res.status(200).json({ user });
+    res.status(201).json({ token, user });
   } catch (error) {
     res.status(400).json({ error: error });
   }

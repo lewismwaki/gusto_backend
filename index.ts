@@ -1,7 +1,8 @@
 import express, { Express } from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import userRoutes from "./routes/user.routes";
+import authRoutes from "./routes/user.routes";
+import recipeRoutes from "./routes/recipe.routes";
 
 dotenv.config();
 
@@ -14,9 +15,8 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use("/api/user", userRoutes);
-
-// app.use('/sign-in', signInRoutes)
+app.use("/api/user", authRoutes);
+app.use("/api/recipes", recipeRoutes);
 
 mongoose
   .connect(process.env.MONGO_URI!)

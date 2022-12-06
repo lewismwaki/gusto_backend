@@ -7,6 +7,7 @@ const express_1 = __importDefault(require("express"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const user_routes_1 = __importDefault(require("./routes/user.routes"));
+const recipe_routes_1 = __importDefault(require("./routes/recipe.routes"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
@@ -15,7 +16,7 @@ app.use((req, res, next) => {
     next();
 });
 app.use("/api/user", user_routes_1.default);
-// app.use('/sign-in', signInRoutes)
+app.use("/api/recipe", recipe_routes_1.default);
 mongoose_1.default
     .connect(process.env.MONGO_URI)
     .then(() => {
