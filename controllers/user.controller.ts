@@ -23,7 +23,7 @@ export const createUserHandler = async (
     if (emailExists) {
       return res
         .status(400)
-        .json({ error: "User with this email already exists" });
+        .json({ error: "User with this email already exists." });
     }
 
     if (!validator.isMobilePhone(phoneNumber.toString())) {
