@@ -1,3 +1,3 @@
 # appetit_backend
 
-express, typescript, zod, mongo
+express, typescript, zod, mongoDB
